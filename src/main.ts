@@ -1,6 +1,7 @@
 import { app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, Notification, powerMonitor, screen, session, shell, Tray } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
+import { parseEnv } from 'node:util';
 import { uIOhook, UiohookKey } from 'uiohook-napi';
 import { cleanTranscript, warmUp } from './cleanup';
 import { DeepgramStream } from './deepgram';
@@ -14,17 +15,23 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 // Installed app: %APPDATA%\Sayso\.env. From source (npm start): the project's own .env.
 const envPath = path.join(app.isPackaged ? app.getPath('userData') : app.getAppPath(), '.env');
-const hasEnv = fs.existsSync(envPath);
-if (hasEnv) process.loadEnvFile(envPath);
 
-const config = {
-  deepgramKey: process.env.DEEPGRAM_API_KEY?.trim() ?? '',
-  anthropicKey: process.env.ANTHROPIC_API_KEY?.trim() ?? '',
-  language: process.env.DEEPGRAM_LANGUAGE?.trim() || 'en',
-  model: process.env.CLAUDE_MODEL?.trim() || 'claude-haiku-5-5',
-  mic: process.env.MIC_NAME?.trim() ?? '',
-  micAlwaysOn: process.env.MIC_ALWAYS_ON?.trim().toLowerCase() !== 'false',
-};
+// The .env file wins over environment variables, and is re-read when the keys are missing
+// at hotkey time, so adding or fixing keys never needs a restart.
+function readConfig() {
+  const file = fs.existsSync(envPath) ? parseEnv(fs.readFileSync(envPath, 'utf8')) : {};
+  const get = (key: string) => (file[key] ?? process.env[key] ?? '').trim();
+  return {
+    found: fs.existsSync(envPath),
+    deepgramKey: get('DEEPGRAM_API_KEY'),
+    anthropicKey: get('ANTHROPIC_API_KEY'),
+    language: get('DEEPGRAM_LANGUAGE') || 'en',
+    model: get('CLAUDE_MODEL') || 'claude-haiku-5-5',
+    mic: get('MIC_NAME'),
+    micAlwaysOn: get('MIC_ALWAYS_ON').toLowerCase() !== 'false',
+  };
+}
+let config = readConfig();
 
 const logFile = path.join(app.getPath('userData'), 'sayso.log');
 function log(...parts: unknown[]) {
@@ -125,9 +132,10 @@ const hotkeys = new HotkeyTracker((action) => {
 
 function startDictation() {
   if (phase !== 'idle') return hotkeys.reset(); // still pasting the previous one
+  if (!config.deepgramKey) config = readConfig();
   if (!config.deepgramKey) {
     hotkeys.reset();
-    return showError('Add DEEPGRAM_API_KEY to .env');
+    return showError(`Add DEEPGRAM_API_KEY to ${app.isPackaged ? '%APPDATA%\\Sayso\\.env' : '.env'}`);
   }
   // Windows opens the Start menu when Win is released with no other key pressed in
   // between. Tapping an unused key (F24) while Win is held prevents that, as
@@ -306,7 +314,7 @@ else
     powerMonitor.on('lock-screen', () => hotkeys.clear());
     powerMonitor.on('suspend', () => hotkeys.clear());
 
-    log(`started; env ${hasEnv ? envPath : 'missing'}; model ${config.model}; language ${config.language}`);
+    log(`started; env ${config.found ? envPath : 'missing'}; keys ${config.deepgramKey ? 'deepgram' : 'NO-deepgram'}/${config.anthropicKey ? 'anthropic' : 'NO-anthropic'}; model ${config.model}; language ${config.language}`);
     if (!config.deepgramKey || !config.anthropicKey) {
       new Notification({
         title: 'Sayso needs API keys',
