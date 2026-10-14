@@ -87,6 +87,10 @@ function showOverlay() {
     height: OVERLAY.height,
   });
   overlay.showInactive();
+  // Windows drops the topmost flag of a non-focusable window while it is hidden, which
+  // left the pill behind maximized apps such as Chrome. Re-assert it on every show.
+  overlay.setAlwaysOnTop(true, 'screen-saver');
+  overlay.moveTop();
 }
 
 function hideOverlay(afterMs = 0) {

@@ -24,6 +24,17 @@
   }
   body { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; box-sizing: border-box; }
 
+  /* mascot + pill, entering together */
+  .dock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transition: opacity 140ms ease-out, transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+  body:not([data-state="hidden"]) .dock { opacity: 1; transform: none; }
+
   .pill {
     display: flex;
     align-items: center;
@@ -38,11 +49,9 @@
     border: 1px solid var(--border);
     box-shadow: 0 8px 24px rgba(0, 8, 24, 0.5), 0 0 0 1px rgba(90, 169, 255, 0.06), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
     color: var(--text);
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-    transition: opacity 140ms ease-out, transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    animation: drift 3.4s ease-in-out -1.2s infinite alternate;
   }
-  body:not([data-state="hidden"]) .pill { opacity: 1; transform: none; }
+  @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-2px); } }
 
   .wave { display: flex; align-items: center; gap: 3px; height: 22px; }
   .bar {
@@ -72,17 +81,106 @@
   [data-state="error"] .wave { display: none; }
   [data-state="error"] .message, [data-state="error"] .dot { display: block; }
 
+  /* ---------- mascot ---------- */
+
+  .buddy { position: relative; width: 44px; height: 48px; flex: none; }
+  .buddy svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 44px;
+    height: 44px;
+    overflow: visible;
+    animation: float 2.6s ease-in-out infinite alternate;
+  }
+  @keyframes float {
+    from { transform: translateY(1px) rotate(-3deg); }
+    to { transform: translateY(-5px) rotate(3deg); }
+  }
+  /* the shadow shrinks as the mascot rises */
+  .shadow {
+    position: absolute;
+    left: 11px;
+    bottom: 0;
+    width: 22px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(0, 6, 20, 0.45);
+    animation: shadow 2.6s ease-in-out infinite alternate;
+  }
+  @keyframes shadow {
+    from { transform: scaleX(1); opacity: 0.55; }
+    to { transform: scaleX(0.7); opacity: 0.3; }
+  }
+
+  .buddy svg * { transform-box: fill-box; transform-origin: center; }
+  .eyes { animation: blink 4.2s infinite; }
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+  }
+  .pupils { transition: transform 300ms ease; }
+  [data-state="listening"] .pupils { animation: look 2.4s ease-in-out infinite; }
+  @keyframes look {
+    0%, 15% { transform: translateX(-2.4px); }
+    35%, 65% { transform: translateX(2.4px); }
+    85%, 100% { transform: translateX(-2.4px); }
+  }
+  [data-state="processing"] .pupils { animation: think 1.8s ease-in-out infinite alternate; }
+  @keyframes think {
+    from { transform: translate(-1.6px, -1.8px); }
+    to { transform: translate(1.6px, -1.8px); }
+  }
+  [data-state="processing"] .antenna-tip { animation: tip 700ms ease-in-out infinite alternate; }
+  @keyframes tip { from { opacity: 0.35; } to { opacity: 1; } }
+  [data-state="listening"] .antenna-tip { filter: drop-shadow(0 0 3px var(--accent)); }
+
+  [data-state="done"] .eyes { animation: none; transform: scaleY(0.3); } /* happy squint */
+  [data-state="error"] .pupils { transform: translateY(1.6px); }
+  [data-state="error"] .mouth { d: path("M18.5 31.5 L25.5 31.5"); }
+
   @media (prefers-reduced-motion: reduce) {
-    .pill { transition: opacity 120ms linear; transform: none !important; }
+    .dock { transition: opacity 120ms linear; transform: none !important; }
+    .pill, .buddy svg, .shadow, .eyes, .pupils, .antenna-tip { animation: none !important; }
     [data-state="processing"] .bar { animation-duration: 1800ms; }
   }
 </style>
 </head>
 <body data-state="hidden">
-  <div class="pill" role="status" aria-live="polite">
-    <div class="wave" aria-label="Listening"></div>
-    <span class="dot"></span>
-    <span class="message"></span>
+  <div class="dock">
+    <div class="buddy" aria-hidden="true">
+      <svg viewBox="0 0 44 44">
+        <defs>
+          <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8cc6ff"/>
+            <stop offset="1" stop-color="#3a86ec"/>
+          </linearGradient>
+        </defs>
+        <line x1="22" y1="9" x2="22" y2="4.5" stroke="#3a86ec" stroke-width="1.6" stroke-linecap="round"/>
+        <circle class="antenna-tip" cx="22" cy="3.6" r="2.3" fill="#9fd0ff"/>
+        <rect x="5" y="8" width="34" height="30" rx="14" fill="url(#skin)"/>
+        <ellipse cx="17" cy="12.5" rx="7" ry="2.4" fill="#ffffff" opacity="0.28"/>
+        <ellipse cx="10.5" cy="28.5" rx="2.6" ry="1.6" fill="#d6ebff" opacity="0.45"/>
+        <ellipse cx="33.5" cy="28.5" rx="2.6" ry="1.6" fill="#d6ebff" opacity="0.45"/>
+        <g class="eyes">
+          <ellipse cx="16" cy="22" rx="5" ry="5.6" fill="#ffffff"/>
+          <ellipse cx="28" cy="22" rx="5" ry="5.6" fill="#ffffff"/>
+          <g class="pupils">
+            <circle cx="16" cy="22.4" r="2.5" fill="#0e1219"/>
+            <circle cx="28" cy="22.4" r="2.5" fill="#0e1219"/>
+            <circle cx="16.9" cy="21.4" r="0.8" fill="#ffffff"/>
+            <circle cx="28.9" cy="21.4" r="0.8" fill="#ffffff"/>
+          </g>
+        </g>
+        <path class="mouth" d="M18.5 30.5 Q22 33.5 25.5 30.5" fill="none" stroke="#0e1219" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <div class="shadow"></div>
+    </div>
+    <div class="pill" role="status" aria-live="polite">
+      <div class="wave" aria-label="Listening"></div>
+      <span class="dot"></span>
+      <span class="message"></span>
+    </div>
   </div>
   <script src="overlay.js"></script>
 </body>
