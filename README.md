@@ -1,6 +1,6 @@
 # Sayso
 
-Personal push-to-talk dictation for Windows, modelled on Glaido's core workflow:
+Personal push-to-talk dictation for Windows:
 
 **Hold `Ctrl + Win` → speak → release → polished text is pasted where your cursor is.**
 
@@ -11,7 +11,7 @@ Personal push-to-talk dictation for Windows, modelled on Glaido's core workflow:
 | Add `Shift` while holding | Switches the current recording to hands-free |
 | `Esc` | Cancel; nothing is pasted |
 
-A small pill appears at the bottom-centre of the screen with a live lime waveform while you
+A small pill appears at the bottom-centre of the screen with a live blue waveform while you
 talk. It pulses while processing and never takes focus from the app you are typing in.
 
 ## How it works
@@ -79,7 +79,7 @@ Then turn on **Start with Windows** in the tray menu.
 
 ## Troubleshooting
 
-- **Nothing happens on Ctrl + Win.** Check that Sayso's lime dot is in the tray (it may be under the `^` overflow).
+- **Nothing happens on Ctrl + Win.** Check that Sayso's blue dot is in the tray (it may be under the `^` overflow).
 - **"Microphone blocked"**: turn on *Settings → Privacy → Microphone → Allow desktop apps to access your microphone*.
 - **Text is not pasted into an app running as Administrator.** Windows blocks normal apps from sending keys to elevated ones. Press `Ctrl + V` yourself; the text is already on the clipboard.
 - **"No speech detected"**: check the log. `peak` below about -50 dBFS means the wrong or muted mic; set `MIC_NAME`.

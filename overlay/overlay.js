@@ -143,7 +143,7 @@ function cancel() {
   if (!config.alwaysOn) closeMic();
 }
 
-// Short, quiet start/stop tones (Glaido has interaction sounds too).
+// Short, quiet start/stop tones.
 function chime(from, to) {
   if (!ctx || ctx.state !== 'running') return;
   const t = ctx.currentTime;

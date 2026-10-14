@@ -1,4 +1,4 @@
-// Glaido-style Windows hotkeys:
+// Sayso's Windows hotkeys:
 //   Ctrl + Win          hold to talk, release to transcribe + paste
 //   Ctrl + Win + Shift  hands-free: press to start, press Ctrl + Win again to stop
 //   Esc                 cancel (nothing is pasted)

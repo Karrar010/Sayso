@@ -78,7 +78,7 @@ function createOverlay() {
 
 function showOverlay() {
   clearTimeout(hideTimer);
-  // Bottom-centre of whichever screen the mouse is on, like Glaido's dictation bar.
+  // Bottom-centre of whichever screen the mouse is on.
   const { workArea } = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
   overlay.setBounds({
     x: Math.round(workArea.x + (workArea.width - OVERLAY.width) / 2),
@@ -257,7 +257,7 @@ ipcMain.on('mic-error', (_e, message: string) => {
 let tray: Tray;
 
 function trayIcon() {
-  // 32x32 BGRA lime dot (Glaido's accent), drawn in code so no asset files are needed.
+  // 32x32 BGRA blue dot (the overlay's accent), drawn in code so no asset files are needed.
   const size = 32;
   const buf = Buffer.alloc(size * size * 4);
   for (let y = 0; y < size; y++)
@@ -265,9 +265,9 @@ function trayIcon() {
       const d = Math.hypot(x - 15.5, y - 15.5);
       const alpha = Math.max(0, Math.min(1, 12.5 - d));
       const i = (y * size + x) * 4;
-      buf[i] = 0x3c; // B
-      buf[i + 1] = 0xf2; // G
-      buf[i + 2] = 0xc4; // R
+      buf[i] = 0xff; // B
+      buf[i + 1] = 0xa9; // G
+      buf[i + 2] = 0x5a; // R
       buf[i + 3] = Math.round(alpha * 255);
     }
   return nativeImage.createFromBitmap(buf, { width: size, height: size, scaleFactor: 2 });
