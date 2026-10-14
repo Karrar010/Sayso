@@ -1,0 +1,48 @@
+{
+  "name": "sayso",
+  "version": "1.0.0",
+  "description": "Hold Ctrl+Win, speak, release: polished text is pasted where you are typing.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "tsc -p . && electron .",
+    "test": "tsc -p . && node --test \"test/*.test.js\"",
+    "dist": "tsc -p . && electron-builder --win"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "uiohook-napi": "^1.5.5",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/ws": "^8.18.2",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
+    "typescript": "^7.0.2"
+  },
+  "productName": "Sayso",
+  "private": true,
+  "build": {
+    "appId": "local.sayso.dictation",
+    "productName": "Sayso",
+    "files": [
+      "dist/**",
+      "overlay/**",
+      "package.json"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true
+    },
+    "directories": {
+      "output": "release"
+    }
+  }
+}

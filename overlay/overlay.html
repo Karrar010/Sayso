@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>Sayso</title>
+<style>
+  :root {
+    /* Glaido palette: near-black surfaces, hairline borders, lime accent */
+    --surface: #121212;
+    --border: rgba(255, 255, 255, 0.09);
+    --text: #ededed;
+    --muted: #8b8b8b;
+    --accent: #c4f23c;
+    --error: #ff6b5e;
+  }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    user-select: none;
+    font: 500 12.5px/1 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  }
+  body { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; box-sizing: border-box; }
+
+  .pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    height: 38px;
+    min-width: 116px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transition: opacity 140ms ease-out, transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+  body:not([data-state="hidden"]) .pill { opacity: 1; transform: none; }
+
+  .wave { display: flex; align-items: center; gap: 3px; height: 22px; }
+  .bar {
+    width: 3px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: background-color 200ms;
+  }
+
+  /* processing: the waveform goes muted and a soft pulse runs across it */
+  [data-state="processing"] .bar {
+    background: var(--muted);
+    height: 4px !important;
+    animation: pulse 900ms ease-in-out infinite;
+    animation-delay: calc(var(--i) * 60ms);
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scaleY(1); opacity: 0.45; }
+    40% { transform: scaleY(3); opacity: 1; background: var(--accent); }
+  }
+
+  [data-state="done"] .bar { background: var(--accent); height: 4px !important; }
+
+  .message { display: none; white-space: nowrap; color: var(--text); }
+  .dot { display: none; width: 7px; height: 7px; border-radius: 50%; background: var(--error); flex: none; }
+  [data-state="error"] .wave { display: none; }
+  [data-state="error"] .message, [data-state="error"] .dot { display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pill { transition: opacity 120ms linear; transform: none !important; }
+    [data-state="processing"] .bar { animation-duration: 1800ms; }
+  }
+</style>
+</head>
+<body data-state="hidden">
+  <div class="pill" role="status" aria-live="polite">
+    <div class="wave" aria-label="Listening"></div>
+    <span class="dot"></span>
+    <span class="message"></span>
+  </div>
+  <script src="overlay.js"></script>
+</body>
+</html>
